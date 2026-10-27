@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>키움증권 법인RM팀 업체 정보 조회 페이지</title>
+    <!-- SheetJS (Excel 파싱 라이브러리) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --kiwoom-burgundy: #8B0032;
+            --kiwoom-dark-navy: #111827;
+            --kiwoom-navy: #1F2937;
+            --kiwoom-pink: #E6005C;
+            --bg-gray: #F3F4F6;
+            --border-color: #E5E7EB;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 헤더 디자인 */
+        header {
+            background-color: #ffffff;
+            border-bottom: 3px solid var(--kiwoom-burgundy);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--kiwoom-burgundy);
+        }
+
+        .header-logo img {
+            height: 32px;
+            object-fit: contain;
+        }
+
+        /* 메인 컨테이너 */
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            margin: 20px auto;
+            padding: 0 15px;
+            flex: 1;
+        }
+
+        /* 검색 카드 */
+        .search-card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .file-upload-area {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #F9FAFB;
+            border: 1px dashed #D1D5DB;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #6B7280;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 15px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--kiwoom-burgundy);
+        }
+
+        .search-btn {
+            background-color: var(--kiwoom-burgundy);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .search-btn:hover {
+            background-color: #6B0027;
+        }
+
+        /* 결과 영역 */
+        .result-area {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .result-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--kiwoom-navy);
+            border-bottom: 2px solid var(--bg-gray);
+            padding-bottom: 10px;
+        }
+
+        /* 테이블 스타일 */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: var(--kiwoom-navy);
+            color: white;
+            padding: 12px 10px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        tr:nth-child(even) {
+            background-color: #F9FAFB;
+        }
+
+        tr:hover {
+            background-color: #F3F4F6;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px 0;
+            color: #9CA3AF;
+        }
+
+        /* 푸터 */
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 0.8rem;
+            color: #9CA3AF;
+            background-color: #ffffff;
+            border-top: 1px solid var(--border-color);
+            margin-top: auto;
+        }
+
+        /* 모바일 대응 */
+        @media (max-width: 600px) {
+            .header-title {
+                font-size: 0.95rem;
+            }
+            .header-logo img {
+                height: 24px;
+            }
+            .search-form {
+                flex-direction: column;
+            }
+            .search-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="header-title">키움증권 법인RM팀 업체 정보 조회 페이지</div>
+        <div class="header-logo">
+            <!-- 키움증권 공식 CI 로고 -->
+            <img src="https://www.kiwoom.com/kiwoom.ico" alt="키움증권 CI" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Kiwoom_Securities_Logo.svg/512px-Kiwoom_Securities_Logo.svg.png'">
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        
+        <!-- Search Card -->
+        <div class="search-card">
+            <div class="file-upload-area">
+                <label for="excelFile"><strong>Excel 파일 선택 (.xlsx): </strong></label>
+                <input type="file" id="excelFile" accept=".xlsx, .xls" />
+            </div>
+
+            <div class="search-form">
+                <input type="text" id="searchInput" class="search-input" placeholder="사업자번호, 업체명 또는 그룹명을 입력하세요" onkeyup="if(event.keyCode===13) searchData()">
+                <button class="search-btn" onclick="searchData()">조회</button>
+            </div>
+        </div>
+
+        <!-- Result Area -->
+        <div class="result-area">
+            <div class="result-header" id="resultCount">조회 결과 (0건)</div>
+            <div class="table-responsive">
+                <table id="resultTable">
+                    <thead>
+                        <tr id="tableHeader">
+                            <th>정보</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td class="no-data">상단의 엑셀 파일을 업로드하거나 검색어를 입력하여 조회하세요.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        Copyright © KIWOOM Securities Co., Ltd. All rights reserved. (법인RM팀 전용)
+    </footer>
+
+    <script>
+        let excelData = [];
+
+        // 엑셀 파일 읽기 핸들러
+        document.getElementById('excelFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                
+                // 첫 번째 시트 가져오기
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                // JSON 변환
+                excelData = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
+                alert('엑셀 데이터가 성공적으로 로드되었습니다. (총 ' + excelData.length + '건)');
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        // 데이터 검색 함수
+        function searchData() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const tableHeader = document.getElementById('tableHeader');
+            const tableBody = document.getElementById('tableBody');
+            const resultCount = document.getElementById('resultCount');
+
+            if (excelData.length === 0) {
+                alert('먼저 엑셀 파일(.xlsx)을 선택하여 로드해주세요.');
+                return;
+            }
+
+            if (!query) {
+                alert('조회할 사업자번호, 업체명 또는 그룹명을 입력하세요.');
+                return;
+            }
+
+            // 검색 조건: 사업자번호, 업체명, 그룹명 필드에 대해 검색
+            const filteredData = excelData.filter(row => {
+                return Object.keys(row).some(key => {
+                    const value = String(row[key]).toLowerCase();
+                    return value.includes(query);
+                });
+            });
+
+            // 결과 건수 표시
+            resultCount.innerText = `조회 결과 (${filteredData.length}건)`;
+
+            // 테이블 초기화
+            tableHeader.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="100%" class="no-data">해당하는 정보가 없습니다.</td></tr>';
+                return;
+            }
+
+            // 헤더 생성
+            const keys = Object.keys(filteredData[0]);
+            keys.forEach(key => {
+                const th = document.createElement('th');
+                th.innerText = key;
+                tableHeader.appendChild(th);
+            });
+
+            // 바디(리스트 형식) 생성
+            filteredData.forEach(row => {
+                const tr = document.createElement('tr');
+                keys.forEach(key => {
+                    const td = document.createElement('td');
+                    td.innerText = row[key];
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
