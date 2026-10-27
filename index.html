@@ -18,6 +18,13 @@
 .tablewrap th:nth-child(2),.tablewrap td:nth-child(2){left:55px;min-width:100px;max-width:100px;width:100px;padding:12px 10px;font-size:12px}
 }
 .tablewrap th:nth-child(-n+2),.tablewrap td:nth-child(-n+2){overflow-wrap:anywhere;word-break:break-word;line-height:1.4}.tablewrap th:nth-child(1),.tablewrap th:nth-child(2){z-index:5}
+
+/* 그룹 조회: 표 안에서 상하/좌우 스크롤해도 헤더 및 좌측 2열 고정 */
+.tablewrap{max-height:min(70vh,680px);overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.tablewrap thead th{position:sticky;top:0;z-index:6;background:#f1f5fb;box-shadow:0 1px 0 #dfe6f1}
+.tablewrap thead th:nth-child(1),.tablewrap thead th:nth-child(2){z-index:9;background:#f1f5fb}
+.tablewrap tbody td:nth-child(1),.tablewrap tbody td:nth-child(2){z-index:3}
+@media(max-width:600px){.tablewrap{max-height:65vh}}
 </style></head><body><main class="wrap"><header class="hero"><div class="hero-top"><div><div class="eyebrow">키움증권 법인RM팀</div><h1><span>업체 조회</span></h1><p class="subtitle">그룹별 기업 현황과 개별 업체 정보를 간편하게 확인하세요.</p></div><img class="logo" src="kiwoom-logo.png" alt="키움증권"></div></header><section class="search-panel"><div class="search-grid"><div class="field"><label for="group">그룹명 조회</label><div class="input-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><input id="group" placeholder="예: 삼성, 현대, LG, SK" autocomplete="off" aria-autocomplete="list"></div></div><div class="field"><label for="company">업체명 또는 사업자번호 조회</label><div class="input-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><input id="company" placeholder="예: 삼성전자 또는 사업자번호 입력" autocomplete="off" aria-autocomplete="list"></div></div><div class="actions"><button class="primary" id="search">조회</button><button class="secondary" id="reset">초기화</button></div></div></section><div class="meta"><strong id="count">검색어를 입력해 주세요</strong><span class="total" id="total"></span></div><section id="suggestions"><div class="section-label">그룹명 빠른 조회</div><div id="pills" class="group-pills"></div></section><section id="result-section" class="hidden"><div class="result-title"><h2 id="result-heading">조회 결과</h2><small id="hint"></small></div><div id="results" aria-live="polite"></div><div class="pages" id="pages"></div></section><p class="notice">자료 기준: 제공된 엑셀 원본 · 공개 GitHub Pages에서는 데이터 파일도 외부에서 열람할 수 있습니다. 내부정보 공개 가능 여부를 확인하세요.</p></main><script src="data.js"></script><script>
 const columns=Object.keys(DATA[0]||{}),$=id=>document.getElementById(id);
 const norm=s=>String(s??'').toLowerCase().replace(/[\s-]/g,'');
